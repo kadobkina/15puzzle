@@ -19,7 +19,6 @@ public:
 	int emptyPos; // позици€ пустой €чейки
 	int curPos; // позици€ текущей €чейки
 	Node* solve;
-	Node* startNode;
 
 	Node(vector<size_t> vectTag, int empty = -1, int cur = -1, Node* parent = nullptr)
 	{
@@ -46,7 +45,7 @@ public:
 		{
 			if (this->parent != nullptr)
 			{
-				if (this == startNode || this->curPos != this->parent->curPos + 1)
+				if (this->curPos != this->parent->curPos + 1)
 				{
 					nextTag = tag;
 					// передвигаем текущую €чейку
@@ -377,7 +376,6 @@ int main()
 	{
 		printTag(firstPosTag);
 		firstPosTag->parent = nullptr;
-		firstPosTag->startNode = firstPosTag;
 
 		// начало отсчета времени
 		double startTime = clock();
