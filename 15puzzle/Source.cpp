@@ -18,7 +18,6 @@ public:
 	vector<size_t> tag; // текущее состояние пятнашек
 	int emptyPos; // позиция пустой ячейки
 	int curPos; // позиция текущей ячейки
-	Node* startNode;
 	Node* solve;
 
 	Node(vector<size_t> vectTag, int empty = -1, int cur = -1, Node* parent = nullptr)
@@ -252,22 +251,16 @@ pair<int, bool> IDAStarIterative(Node* node, int g, int deep)
 			return make_pair(f, false);
 
 		vector<size_t>& vectTag = node->tag;
-		if (gameOver(vectTag))
-		{
-			cout << "Решено!\n\n";
-			return make_pair(f, true);
-		}
+		if (gameOver(vectTag))		
+			return make_pair(f, true);		
 
 		vector<Node*> steps = node->getPossibleSteps();
 		for (size_t i = 0; i < steps.size(); i++)
 		{
-			pair<int, bool> res = IDAStarIterative(node, g + 1, deep);
+			pair<int, bool> res = IDAStarIterative(steps[i], g + 1, deep);
 
 			if (res.second)
-			{
-				cout << "Решено!\n\n";
 				return res;
-			}
 
 			if (res.first < min)
 				min = res.first;
@@ -282,7 +275,7 @@ pair<int, bool> IDAStar(Node* node)
 
 	while (true)
 	{
-		pair<int, bool> res = IDAStarIterative(node->startNode, 0, deep);
+		pair<int, bool> res = IDAStarIterative(node, 0, deep);
 
 		if (res.second) 
 		{
@@ -315,16 +308,16 @@ int main()
 	//string start = "F2345678A BE91CD"; // нет решения
 	//string start = "123456789ABCDEF "; // 0 шагов
 	//string start = "123456789ABCDE F"; // 1 шаг
-	string start = "1234 67859ACDEBF"; // 5 шагов
+	//string start = "1234 67859ACDEBF"; // 5 шагов
 	//string start = "51342 7896ACDEBF"; // 8 шагов
 	//string start = "16245A37 9C8DEBF"; // 10 шагов
 	//string start = "1723 68459ACDEBF"; // 13 шагов
 	//string start = "12345678A BE9FCD"; // 19 шагов
 	//string start = "512473 8A6BE9FCD"; // 27 шагов,  AStar:  460 мсек,    IDAStar: 493 мсек,    IDAStarIterative: 512 мсек
 	//string start = "F2345678A BE91DC"; // 33 шага
-	//string start = "751238 4A6BE9FCD"; // 35 шагов,  AStar: 6368 мсек,   IDAStar: 5994 мсек,   IDAStarIterative: 4450 мсек
+	string start = "751238 4A6BE9FCD"; // 35 шагов,  AStar: 6368 мсек,   IDAStar: 5994 мсек,   IDAStarIterative: 4450 мсек
 	//string start = "75AB2C416D389F E"; // 45 шагов
-	//string start = " 4582E1DF79BCA36"; // 48 шагов,  IDAStarIterative:  8941 мсек /  4064 мсек
+    //string start = " 4582E1DF79BCA36"; // 48 шагов
 	//string start = "FE169B4C A73D852"; // 52 шага
 	//string start = "D79F2E8A451 6C3B"; // 55 шагов
 	//string start = "DBE87A2C91F65 34"; // 58 шагов   
@@ -366,7 +359,6 @@ int main()
 	}
 
 	Node* firstPosTag = new Node(startTag);
-	firstPosTag->startNode = firstPosTag;
 
 	// проверка на готовое решение
 	if (gameOver(startTag))
@@ -389,12 +381,11 @@ int main()
 
 		//Node* res = AStar(firstPosTag);
 		pair<int, bool> res = IDAStar(firstPosTag);
-		//pair<int, bool> res = IDAStarIterative(firstPosTag, 5);
 
 		//printTag(res);
 
 		// количество шагов до решения
-		int stepsCount = 0;
+		//int stepsCount = 0;
 		//while (res != nullptr)
 		//{
 		//	res = res->parent;
