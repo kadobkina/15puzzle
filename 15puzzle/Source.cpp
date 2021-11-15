@@ -19,6 +19,7 @@ public:
 	int emptyPos; // позиция пустой ячейки
 	int curPos; // позиция текущей ячейки
 	Node* solve;
+	Node* startNode;
 
 	Node(vector<size_t> vectTag, int empty = -1, int cur = -1, Node* parent = nullptr)
 	{
@@ -43,34 +44,86 @@ public:
 
 		if (curPos > 0)
 		{
-			nextTag = tag;
-			// передвигаем текущую ячейку
-			nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos - 1) * 4];
-			// передвигаем пустую ячейку
-			nextTag[emptyPos + (curPos - 1) * 4] = 0;
-			// добавляем новый возможный шаг
-			possibleSteps.push_back(new Node(nextTag, emptyPos, curPos - 1, this));
+			if (this->parent != nullptr)
+			{
+				if (this == startNode || this->curPos != this->parent->curPos + 1)
+				{
+					nextTag = tag;
+					// передвигаем текущую ячейку
+					nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos - 1) * 4];
+					// передвигаем пустую ячейку
+					nextTag[emptyPos + (curPos - 1) * 4] = 0;
+					// добавляем новый возможный шаг
+					possibleSteps.push_back(new Node(nextTag, emptyPos, curPos - 1, this));
+				}
+			}
+			else
+			{
+				nextTag = tag;
+				nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos - 1) * 4];
+				nextTag[emptyPos + (curPos - 1) * 4] = 0;
+				possibleSteps.push_back(new Node(nextTag, emptyPos, curPos - 1, this));
+			}
 		}
 		if (curPos < 3)
 		{
-			nextTag = tag;
-			nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos + 1) * 4];
-			nextTag[emptyPos + (curPos + 1) * 4] = 0;
-			possibleSteps.push_back(new Node(nextTag, emptyPos, curPos + 1, this));
+			if (this->parent != nullptr)
+			{
+				if (this->curPos != this->parent->curPos - 1)
+				{
+					nextTag = tag;
+					nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos + 1) * 4];
+					nextTag[emptyPos + (curPos + 1) * 4] = 0;
+					possibleSteps.push_back(new Node(nextTag, emptyPos, curPos + 1, this));
+				}
+			}
+			else
+			{
+				nextTag = tag;
+				nextTag[emptyPos + curPos * 4] = nextTag[emptyPos + (curPos + 1) * 4];
+				nextTag[emptyPos + (curPos + 1) * 4] = 0;
+				possibleSteps.push_back(new Node(nextTag, emptyPos, curPos + 1, this));
+			}
 		}
 		if (emptyPos > 0)
 		{
-			nextTag = tag;
-			nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos - 1) + curPos * 4];
-			nextTag[(emptyPos - 1) + curPos * 4] = 0;
-			possibleSteps.push_back(new Node(nextTag, emptyPos - 1, curPos, this));
+			if (this->parent != nullptr)
+			{
+				if (this->emptyPos != this->parent->emptyPos + 1)
+				{
+					nextTag = tag;
+					nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos - 1) + curPos * 4];
+					nextTag[(emptyPos - 1) + curPos * 4] = 0;
+					possibleSteps.push_back(new Node(nextTag, emptyPos - 1, curPos, this));
+				}
+			}
+			else
+			{
+				nextTag = tag;
+				nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos - 1) + curPos * 4];
+				nextTag[(emptyPos - 1) + curPos * 4] = 0;
+				possibleSteps.push_back(new Node(nextTag, emptyPos - 1, curPos, this));
+			}
 		}
 		if (emptyPos < 3)
 		{
-			nextTag = tag;
-			nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos + 1) + curPos * 4];
-			nextTag[(emptyPos + 1) + curPos * 4] = 0;
-			possibleSteps.push_back(new Node(nextTag, emptyPos + 1, curPos, this));
+			if (this->parent != nullptr)
+			{
+				if (this->emptyPos != this->parent->emptyPos - 1)
+				{
+					nextTag = tag;
+					nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos + 1) + curPos * 4];
+					nextTag[(emptyPos + 1) + curPos * 4] = 0;
+					possibleSteps.push_back(new Node(nextTag, emptyPos + 1, curPos, this));
+				}
+			}
+			else
+			{
+				nextTag = tag;
+				nextTag[emptyPos + curPos * 4] = nextTag[(emptyPos + 1) + curPos * 4];
+				nextTag[(emptyPos + 1) + curPos * 4] = 0;
+				possibleSteps.push_back(new Node(nextTag, emptyPos + 1, curPos, this));
+			}
 		}
 
 		return possibleSteps;
@@ -198,42 +251,6 @@ Node* AStar(Node* t)
 	return 0;
 }
 
-// итеративный алгоритм IDA*
-//pair<int, Node*> IDAStarIterative(Node* t, int deep)
-//{
-//	priority_queue<pair<int, Node*>> pq;
-//	unordered_set<Node*> passed;
-//
-//	pq.push(pair<int, Node*>(manhattanDistance(t), t));
-//
-//	while (!pq.empty())
-//	{
-//		pair<int, Node*> temp = pq.top();
-//		passed.insert(temp.second);
-//		pq.pop();
-//
-//		if (gameOver(temp.second->tag)) {
-//			cout << "Решено!\n\n";
-//			return temp;
-//		}
-//
-//		// длина пути поиска
-//		int len = -manhattanDistance(temp.second) - temp.first;
-//
-//		// проверка превышения заданной глубины поиска
-//		if (len + 1 >= deep) return pair<int, Node*>(0, nullptr);
-//
-//		vector<Node*> steps = temp.second->getPossibleSteps();
-//		for (size_t i = 0; i < steps.size(); i++)
-//		{
-//			if (passed.find(steps[i]) == passed.end())
-//				pq.emplace(-(manhattanDistance(steps[i]) + len + 1), steps[i]);
-//		}
-//	}
-//	return pair<int, Node*>(0, nullptr);
-//}
-
-
 /// <summary>
 /// https://en.wikipedia.org/wiki/Iterative_deepening_A*
 /// </summary>
@@ -286,20 +303,6 @@ pair<int, bool> IDAStar(Node* node)
 	}
 }
 
-// алгоритм IDA*
-//Node* IDAStar(Node* node)
-//{
-//	int deep = manhattanDistance(node);
-//	while (true)
-//	{
-//		pair<int, Node*> res = IDAStarIterative(node, deep);
-//		if (gameOver(res.second->tag) && res.second != nullptr)
-//			return res.second;
-//		deep = res.first;
-//	}
-//	return nullptr;
-//}
-
 int main()
 {
 	setlocale(LC_ALL, "rus");
@@ -313,13 +316,13 @@ int main()
 	//string start = "16245A37 9C8DEBF"; // 10 шагов
 	//string start = "1723 68459ACDEBF"; // 13 шагов
 	//string start = "12345678A BE9FCD"; // 19 шагов
-	//string start = "512473 8A6BE9FCD"; // 27 шагов,  AStar:  460 мсек,    IDAStar: 493 мсек,    IDAStarIterative: 512 мсек
+	string start = "512473 8A6BE9FCD"; // 27 шагов,  AStar:  2 мсек,    IDAStar: 2 мсек
 	//string start = "F2345678A BE91DC"; // 33 шага
-	string start = "751238 4A6BE9FCD"; // 35 шагов,  AStar: 6368 мсек,   IDAStar: 5994 мсек,   IDAStarIterative: 4450 мсек
+	//string start = "751238 4A6BE9FCD"; // 35 шагов,  AStar: 16 мсек,   IDAStar: 16 мсек
 	//string start = "75AB2C416D389F E"; // 45 шагов
-    //string start = " 4582E1DF79BCA36"; // 48 шагов
+    //string start = " 4582E1DF79BCA36"; // 48 шагов,  AStar: 281 мсек,   IDAStar: 203 мсек
 	//string start = "FE169B4C A73D852"; // 52 шага
-	//string start = "D79F2E8A451 6C3B"; // 55 шагов
+	//string start = "D79F2E8A451 6C3B"; // 55 шагов,  AStar: 5310 мсек,   IDAStar: 6961 мсек
 	//string start = "DBE87A2C91F65 34"; // 58 шагов   
 	//string start = "BAC F478E19623D5"; // 61 шаг
 
@@ -374,29 +377,37 @@ int main()
 	{
 		printTag(firstPosTag);
 		firstPosTag->parent = nullptr;
+		firstPosTag->startNode = firstPosTag;
 
 		// начало отсчета времени
 		double startTime = clock();
 		srand((unsigned)time(0));
 
-		//Node* res = AStar(firstPosTag);
-		pair<int, bool> res = IDAStar(firstPosTag);
+
+		// -----------------------------------проверка работы AStar-----------------------------------
+	/*	Node* res = AStar(firstPosTag);
 
 		//printTag(res);
 
 		// количество шагов до решения
-		//int stepsCount = 0;
-		//while (res != nullptr)
-		//{
-		//	res = res->parent;
-		//	stepsCount++;
-		//}
+		int stepsCount = 0;
+		while (res != nullptr)
+		{
+			res = res->parent;
+			stepsCount++;
+		}
 
 		// конец отсчета времени
 		int endTime = (int)(((double)clock() - startTime) / CLOCKS_PER_SEC * 1e3);
 
-		//printf("Количество шагов до решения: %d, время выполнения: %d мсек\n", stepsCount - 1, endTime);
-		printf("Количество шагов до решения: %d, время выполнения: %d мсек\n", res.first, endTime);
+		printf("Количество шагов до решения: %d, время выполнения: %d мсек\n", stepsCount - 1, endTime); */
+
+
+		// -----------------------------------проверка работы IDAStar-----------------------------------
+		pair<int, bool> res = IDAStar(firstPosTag);
+		// конец отсчета времени
+		int endTime = (int)(((double)clock() - startTime) / CLOCKS_PER_SEC * 1e3);
+		printf("Количество шагов до решения: %d, время выполнения: %d мсек\n", res.first, endTime); 
 
 	}
 	return 0;
